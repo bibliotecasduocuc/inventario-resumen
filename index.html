@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inventario de Colecciones de Bibliotecas Duoc UC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Merriweather:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --negro:#1b1b1b; --texto:#1f1f1f; --gris:#5f5f5f; --gris2:#8c8c8c; --linea:#dcdcdc; --fondo:#f2f2f2; --blanco:#fff; --amarillo:#ffb800;
+  --disp:#2e9e5b; --pres:#2f6fb3; --val:#e8a400; --ext:#d64545;
+  --serif:"Merriweather",Georgia,"Times New Roman",serif; --sans:"Lato","Segoe UI",system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--fondo);color:var(--texto);font-family:var(--sans);font-size:16px;line-height:1.5}
+button,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--amarillo);outline-offset:2px}
+
+.cabecera{background:var(--negro);color:#fff;border-bottom:6px solid var(--amarillo)}
+.cabecera-in{max-width:1680px;margin:0 auto;padding:30px 34px 26px;display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+.cabecera h1{font-family:var(--serif);font-weight:900;font-size:34px;line-height:1.2;margin:0}
+#estadoCarga{margin:8px 0 0;font-size:18px;color:var(--amarillo)}
+#estadoCarga.error{color:#ff8a80}
+.filtros{margin-left:auto;display:flex;gap:16px;flex-wrap:wrap}
+.filtros label{display:flex;flex-direction:column;gap:6px;font-size:15px;color:#e6e6e6}
+.filtros select{appearance:none;-webkit-appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0h12L6 8z' fill='%231b1b1b'/%3E%3C/svg%3E") no-repeat right 16px center;color:var(--texto);border:0;border-radius:4px;font-size:20px;padding:10px 44px 10px 14px;min-width:300px}
+#lblSede select{min-width:396px}
+
+.contenido{max-width:1680px;margin:0 auto;padding:0 42px 60px}
+.pestanas{display:flex;gap:4px;border-bottom:1px solid #cfcfcf;margin-top:26px;overflow-x:auto}
+.pestanas button{background:none;border:0;border-bottom:3px solid transparent;padding:14px 22px 12px;font-size:20px;color:#555;cursor:pointer;white-space:nowrap}
+.pestanas button:hover{color:var(--negro)}
+.pestanas button[aria-selected="true"]{color:var(--negro);font-weight:700;border-bottom-color:var(--amarillo)}
+
+.seccion-cab{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:28px 0 22px}
+.seccion-cab h2{font-family:var(--serif);font-weight:900;font-size:42px;line-height:1.15;margin:0}
+.seccion-cab .sub{font-size:19px;color:var(--gris);display:flex;gap:2px 18px;flex-wrap:wrap;flex:1 1 320px;min-width:0}
+.descargas{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--gris);font-size:17px}
+.descargas button{background:#fff;border:1px solid var(--linea);border-radius:4px;padding:8px 18px;font-weight:700;font-size:17px;cursor:pointer}
+.descargas button:hover{border-color:var(--negro)}
+
+.tarjetas{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:14px}
+.tarjeta{background:#fff;border:1px solid var(--linea);border-top:3px solid var(--negro);border-radius:4px;padding:16px 18px 20px;min-height:150px}
+.tarjeta .n{font-size:34px;line-height:1.2;font-variant-numeric:tabular-nums}
+.tarjeta .e{font-size:17px;color:var(--gris);line-height:1.7;margin-top:4px}
+.tarjeta .e i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:7px}
+.tarjeta .r{font-size:14px;color:var(--gris2);margin-top:6px}
+
+.panel{background:#fff;border:1px solid var(--linea);border-radius:4px;padding:24px 26px;margin-top:22px}
+.panel-cab{display:flex;align-items:center;gap:12px 22px;flex-wrap:wrap;margin-bottom:16px}
+.panel h3{font-family:var(--serif);font-weight:700;font-size:20px;margin:0}
+.nota{font-size:14px;color:var(--gris2);margin:12px 0 0}
+.dos{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+.dos .panel{margin-top:22px}
+.leyenda{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:var(--gris)}
+.leyenda span{display:inline-flex;align-items:center;gap:6px}
+.sq{display:inline-block;width:11px;height:11px;border-radius:2px;flex:none}
+
+.orden{margin-left:auto;display:flex;border:1px solid var(--linea);border-radius:4px;overflow:hidden}
+.orden button{border:0;background:#fff;padding:7px 12px;font-size:14px;color:var(--gris);cursor:pointer}
+.orden button+button{border-left:1px solid var(--linea)}
+.orden button[aria-pressed="true"]{background:var(--negro);color:#fff}
+
+.muro-cab,.muro .fila{display:grid;grid-template-columns:240px minmax(0,1fr) 90px 110px 110px;gap:16px;align-items:center}
+.muro-cab{font-size:13px;color:var(--gris2);padding:0 10px 8px}
+.muro .fila{width:100%;border:0;background:none;text-align:left;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:15px}
+.muro .fila:hover{background:#f6f6f6}
+.cod{display:inline-block;width:36px;font-weight:700}
+.barra{display:flex;height:20px;gap:2px;border-radius:3px;overflow:hidden}
+.barra span{display:block;height:100%}
+.pendiente{color:var(--gris2)} .pendiente .cod{font-weight:400}
+.pendiente .barra{border:1px dashed #c4c4c4;align-items:center;padding-left:10px;font-size:12px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+
+.hbar{display:grid;grid-template-columns:200px minmax(0,1fr) 80px;gap:14px;align-items:center;margin:9px 0;font-size:15px}
+.hbar .t{display:flex;height:16px;gap:2px}
+.hbar .t span{display:block;height:100%}
+.hbar .t span:first-child{border-radius:3px 0 0 3px} .hbar .t span:last-child{border-radius:0 3px 3px 0}
+.hbar.total{border-top:1px solid var(--linea);padding-top:9px;font-weight:700}
+.dist{display:flex;height:30px;gap:2px;border-radius:3px;overflow:hidden;margin:4px 0 14px}
+.dist span{display:block;height:100%}
+.comp{margin:12px 0 16px}
+.comp .fila1{display:flex;justify-content:space-between;font-size:15px}
+.comp .b1,.comp .b2{background:#efefef;border-radius:3px;margin-top:5px} .comp .b2{height:5px} .comp .b1{height:10px}
+.comp .b1 div,.comp .b2 div{height:100%;border-radius:3px}
+
+.tabla{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 12px;border-bottom:1px solid #e6e6e6;text-align:right;white-space:nowrap}
+th:first-child,td:first-child,.izq{text-align:left}
+thead th{background:#f6f6f6;font-weight:700}
+thead tr.grupo th{background:#fff;font-weight:400;font-size:13px;color:var(--gris);border-bottom:0;border-top:4px solid transparent;text-align:center}
+tfoot th{font-weight:700;border-top:2px solid var(--negro)}
+td.desc{color:var(--gris);white-space:normal;min-width:180px}
+.desc-tipo{color:var(--gris);font-size:13px;white-space:normal}
+.vacio{text-align:center;color:var(--gris);padding:60px 24px}
+.vacio b{display:block;font-family:var(--serif);font-size:22px;color:var(--texto);margin-bottom:6px}
+.enlace{background:none;border:0;padding:0;color:var(--pres);text-decoration:underline;cursor:pointer;font-size:inherit}
+
+@media (max-width:1000px){
+  .dos{grid-template-columns:1fr}
+  .muro-cab,.muro .fila{grid-template-columns:110px minmax(0,1fr) 70px 80px}
+  .muro-cab span:nth-child(4),.muro .fila>span:nth-child(4){display:none}
+  .nom{display:none}
+  .contenido{padding:0 18px 40px} .cabecera-in{padding:22px 18px}
+  #lblSede select,.filtros select{min-width:0;width:100%} .filtros{margin-left:0;width:100%}
+  .seccion-cab h2{font-size:32px}
+  .tarjetas{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px} .tarjeta{min-height:0;padding:12px 14px 14px} .tarjeta .n{font-size:28px} .tarjeta .e{font-size:15px;line-height:1.5}
+}
+@media print{
+  body{background:#fff}
+  .filtros,.pestanas,.descargas,.orden{display:none!important}
+  .cabecera{background:#fff;color:var(--texto);border-bottom:4px solid var(--amarillo)} #estadoCarga{display:none}
+  .panel,.tarjeta{break-inside:avoid}
+  .contenido{padding:0 12px}
+}
+</style>
+</head>
+<body>
+<header class="cabecera">
+  <div class="cabecera-in">
+    <div>
+      <h1>Inventario de Colecciones de Bibliotecas Duoc UC</h1>
+      <p id="estadoCarga" role="status">Cargando datos…</p>
+    </div>
+    <div class="filtros">
+      <label id="lblProceso" hidden>Proceso<select id="selProceso"></select></label>
+      <label id="lblSede">Biblioteca<select id="selSede"><option value="">Toda la red</option></select></label>
+    </div>
+  </div>
+</header>
+
+<div class="contenido">
+  <nav class="pestanas" role="tablist" id="pestanas"></nav>
+  <main id="seccion"></main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ===== Configuración: pega aquí los enlaces CSV publicados desde la planilla ===== */
+var CONFIG = {
+  csvDatos: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQRzwWnl92VSwVSCUE7upFvAci2TotxkyKK7SVWo1g7nkqDme7UiCHPv8ETKbGOSxgkC2v02UOS6lYz/pub?gid=1915187921&single=true&output=csv',
+  csvPublicacion: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQRzwWnl92VSwVSCUE7upFvAci2TotxkyKK7SVWo1g7nkqDme7UiCHPv8ETKbGOSxgkC2v02UOS6lYz/pub?gid=1542604121&single=true&output=csv'
+};
+/* ================================================================================ */
+
+var SEDES = [['AL','Alameda'],['AO','Alonso Ovalle'],['AV','Antonio Varas'],['CO','Concepción'],
+  ['LC','Luis Cousiño'],['MA','Maipú'],['PA','Puente Alto'],['PM','Puerto Montt'],
+  ['PN','Plaza Norte'],['PO','Plaza Oeste'],['PV','Plaza Vespucio'],['SB','San Bernardo'],['SC','San Carlos'],
+  ['SJ','San Joaquín'],['VA','Valparaíso'],['VM','Viña del Mar']];
+// Fuera de este inventario: campus Arauco, Nacimiento y Villarrica, y sede Melipilla (se ignoran aunque tengan datos)
+var EXCLUIDAS = ['AR','NA','VR','ME'];
+var NOTA_ALCANCE = 'Inventario refleja estado julio 2026 (no considera campus ni sede Melipilla)';
+var TIPOS = {AV:'Audiovisual','AV-EQUIP':'Equipo audiovisual',BKAD:'Libro Alta Demanda',BKCG:'Libro Colección General',
+  BKDG:'Libro Digital',BKRE:'Libro Recreación',BKRF:'Libro Referencia',CAAD:'Calculadora Alta Demanda',CARF:'Calculadora Referencia',
+  CDAD:'CDROM Alta Demanda',CDCG:'CDROM Colección General',CDRE:'CDROM Recreación',CDRF:'CDROM Referencia',DIRF:'Diapositivas',
+  DVDAD:'DVD Alta Demanda',DVDCG:'DVD Colección General',DVDRE:'DVD Recreación',DVDRF:'DVD Referencia',EQRF:'Equipo de Referencia',
+  EQRF_N:'Notebooks',LAMRE:'Láminas Recreación',LAMRF:'Láminas Referencia',LTRE:'Ludoteca Recreación',MAGAZINE:'Revista',
+  MPAD:'Mapa Alta Demanda',MPCG:'Mapa Colección General',MPRF:'Mapa Referencia',MUAD:'Música Alta Demanda',MUCG:'Música Colección General',
+  MURE:'Música Recreación',NBAD:'Material no bibliográfico',NEWSPAPER:'Periódico',PLRF:'Planos',PPAD:'Revista Alta Demanda',
+  PPCG:'Revista Colección General',PPRE:'Revista Recreación',PPRF:'Revista Referencia',TTAD:'Trabajo Título Alta Demanda',
+  TTCG:'Trabajo Título Colección General',TTRF:'Trabajo Título Referencia',VDAD:'Video Alta Demanda',VDCG:'Video Colección General',
+  VDRE:'Videojuego Recreación',VDRF:'Video Referencia'};
+
+var CATS = ['Disponibles','Prestados','Para valorizar','Extraviados y perdidos'];
+var COLOR = {'Disponibles':'#2e9e5b','Prestados':'#2f6fb3','Para valorizar':'#e8a400','Extraviados y perdidos':'#d64545'};
+var ORDEN_ESTADOS = ['Disponible','Prestado','Retirado de colección','En valorización','Extraviado','Ítem extraviado',
+  'Perdido','Pérdida asumida','Perdido/confirmado','Perdido/pagado'];
+var TONO = {'Disponible':'#2e9e5b','Prestado':'#2f6fb3','Retirado de colección':'#e8a400','En valorización':'#f5cf5f',
+  'Extraviado':'#d64545','Ítem extraviado':'#f09a9a','Perdido':'#a32f2f','Pérdida asumida':'#e8735f',
+  'Perdido/confirmado':'#6e1c1c','Perdido/pagado':'#c96b6b'};
+var SECCIONES = [['estado','Estado de la colección'],['valorizar','Material a valorizar'],['extraviados','Extraviados y perdidos'],['tipos','Por tipo de ítem']];
+
+var D = {datos:[], cargas:[], procesos:[], nombre:{}, catEstado:{}, listo:false};
+var S = {proceso:null, sede:'', seccion:'estado', orden:'codigo'};
+var EXCEL = [];
+
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function norm(s){return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
+function fmt(n){return Math.round(n||0).toLocaleString('es-CL');}
+function pctN(a,b){return b?Math.round(a/b*1000)/10:0;}
+function pct(a,b){return b?pctN(a,b).toLocaleString('es-CL',{minimumFractionDigits:1,maximumFractionDigits:1})+'%':'–';}
+function sq(c){return '<i class="sq" style="background:'+c+'"></i>';}
+function num(v){
+  var s=String(v==null?'':v).replace(/\s/g,'');
+  if(!s) return 0;
+  if(/^-?\d{1,3}([.,]\d{3})+$/.test(s)) return Number(s.replace(/[.,]/g,''));
+  var n=Number(s.replace(',','.')); return isFinite(n)?n:0;
+}
+
+/* ---------- datos ---------- */
+
+function leerCSV(url){
+  return fetch(url+(url.indexOf('?')>=0?'&':'?')+'_='+Date.now(),{cache:'no-store'})
+    .then(function(r){if(!r.ok) throw new Error('la planilla respondió '+r.status); return r.text();})
+    .then(function(t){
+      if(/^\s*<(!doctype|html)/i.test(t)) throw new Error('el enlace no entrega un CSV. Revisa que la hoja esté publicada como CSV y sin restricción de dominio');
+      return Papa.parse(t,{skipEmptyLines:true}).data;
+    });
+}
+
+function columnas(cab,nombres,hoja){
+  var n=cab.map(norm);
+  return nombres.map(function(x){var i=n.indexOf(norm(x)); if(i<0) throw new Error('falta la columna "'+x+'" en la hoja '+hoja); return i;});
+}
+
+function procesar(filasDatos,filasPub){
+  var a=columnas(filasDatos[0]||[],['Proceso','Sede','Tipo ítem','Estado','Categoría','Cantidad'],'Datos');
+  D.datos=filasDatos.slice(1).map(function(r){
+    return [String(r[a[0]]||'').trim(),String(r[a[1]]||'').trim().toUpperCase(),String(r[a[2]]||'').trim().toUpperCase(),
+            String(r[a[3]]||'').trim(),String(r[a[4]]||'').trim(),num(r[a[5]])];
+  }).filter(function(r){return r[0]&&r[1]&&r[5]&&CATS.indexOf(r[4])>=0&&EXCLUIDAS.indexOf(r[1])<0;});
+  var b=columnas(filasPub[0]||[],['Proceso','Sede','Biblioteca','Fecha de corte','Archivo'],'Publicación');
+  D.cargas=filasPub.slice(1).map(function(r){
+    return [String(r[b[0]]||'').trim(),String(r[b[1]]||'').trim().toUpperCase(),String(r[b[2]]||'').trim(),String(r[b[3]]||'').trim(),String(r[b[4]]||'').trim()];
+  }).filter(function(r){return r[0]&&r[1]&&EXCLUIDAS.indexOf(r[1])<0;});
+
+  D.nombre={}; SEDES.forEach(function(s){D.nombre[s[0]]=s[1];});
+  D.cargas.forEach(function(c){if(!D.nombre[c[1]]){D.nombre[c[1]]=c[2]||c[1]; SEDES.push([c[1],c[2]||c[1]]);}});
+  D.datos.forEach(function(r){if(!D.nombre[r[1]]){D.nombre[r[1]]=r[1]; SEDES.push([r[1],r[1]]);}});
+  SEDES.sort(function(x,y){return x[0]<y[0]?-1:1;});
+  D.catEstado={}; D.datos.forEach(function(r){D.catEstado[r[3]]=r[4];});
+  D.procesos=[];
+  D.datos.concat(D.cargas).forEach(function(r){if(D.procesos.indexOf(r[0])<0) D.procesos.push(r[0]);});
+  var ultimo=D.cargas.length?D.cargas[D.cargas.length-1][0]:D.procesos[D.procesos.length-1];
+  if(!S.proceso||D.procesos.indexOf(S.proceso)<0) S.proceso=ultimo||null;
+  D.listo=true;
+}
+
+function cargar(){
+  if(!CONFIG.csvDatos||!CONFIG.csvPublicacion){
+    estado('error','Falta configurar los enlaces CSV en el archivo (bloque CONFIG).'); render(); return;
+  }
+  Promise.all([leerCSV(CONFIG.csvDatos),leerCSV(CONFIG.csvPublicacion)])
+    .then(function(r){procesar(r[0],r[1]); estado('ok','✓ Datos cargados correctamente.'); render();})
+    .catch(function(e){estado('error','No se pudieron cargar los datos: '+e.message+'.'); render();});
+}
+function estado(tipo,txt){var p=$('estadoCarga'); p.textContent=txt; p.className=tipo==='error'?'error':'';}
+
+function vacio(){var a={total:0,cat:{},est:{}}; CATS.forEach(function(c){a.cat[c]=0;}); return a;}
+function sumar(a,r){a.total+=r[5]; a.cat[r[4]]=(a.cat[r[4]]||0)+r[5]; a.est[r[3]]=(a.est[r[3]]||0)+r[5];}
+function agregar(){
+  var A={red:vacio(),porSede:{},porTipo:{},porTipoSede:{},cargas:{}};
+  D.datos.forEach(function(r){
+    if(r[0]!==S.proceso) return;
+    sumar(A.red,r);
+    sumar(A.porSede[r[1]]=A.porSede[r[1]]||vacio(),r);
+    sumar(A.porTipo[r[2]]=A.porTipo[r[2]]||vacio(),r);
+    if(r[1]===S.sede) sumar(A.porTipoSede[r[2]]=A.porTipoSede[r[2]]||vacio(),r);
+  });
+  D.cargas.forEach(function(c){if(c[0]===S.proceso) A.cargas[c[1]]=c;});
+  return A;
+}
+function estadosDe(a,cat){
+  return ORDEN_ESTADOS.concat(Object.keys(a.est).filter(function(e){return ORDEN_ESTADOS.indexOf(e)<0;}))
+    .filter(function(e){return a.est[e]&&(!cat||D.catEstado[e]===cat);});
+}
+function valorizar(a){return a.cat['Para valorizar']+a.cat['Extraviados y perdidos'];}
+
+/* ---------- URL (?sede=PN&seccion=valorizar) ---------- */
+
+function leerURL(){
+  var p=new URLSearchParams(location.search);
+  var s=(p.get('sede')||'').toUpperCase(); if(s) S.sede=s;
+  var sec=p.get('seccion'); if(SECCIONES.some(function(x){return x[0]===sec;})) S.seccion=sec;
+}
+function escribirURL(){
+  var p=new URLSearchParams();
+  if(S.sede) p.set('sede',S.sede);
+  if(S.seccion!=='estado') p.set('seccion',S.seccion);
+  var q=p.toString(); try{history.replaceState(null,'',location.pathname+(q?'?'+q:''));}catch(e){}
+}
+
+/* ---------- piezas comunes ---------- */
+
+function tarjeta(n,etq,color,ref){
+  return '<div class="tarjeta"><div class="n">'+n+'</div><div class="e">'+(color?sq(color):'')+String(etq).replace(/\//g,'/<wbr>')+'</div>'+(ref?'<div class="r">'+ref+'</div>':'')+'</div>';
+}
+function leyenda(items){return '<div class="leyenda">'+items.map(function(x){return '<span>'+sq(x[1])+esc(x[0])+'</span>';}).join('')+'</div>';}
+function barraApilada(partes,total,cls){
+  return '<div class="'+(cls||'barra')+'">'+partes.map(function(p){
+    return p[1]?'<span title="'+esc(p[0])+': '+fmt(p[1])+' ('+pct(p[1],total)+')" style="width:'+(p[1]/total*100)+'%;background:'+p[2]+';min-width:3px"></span>':'';
+  }).join('')+'</div>';
+}
+function hbar(etq,partes,max,valor,extra){
+  var t=partes.reduce(function(s,p){return s+p[1];},0);
+  return '<div class="hbar"><span>'+etq+'</span><span class="t" style="width:'+Math.max(t/max*100,0.5)+'%">'+partes.map(function(p){
+    return p[1]?'<span title="'+esc(p[0])+': '+fmt(p[1])+'" style="width:'+(p[1]/t*100)+'%;background:'+p[2]+';min-width:3px"></span>':'';
+  }).join('')+'</span><span class="num">'+(valor!=null?valor:fmt(t))+(extra||'')+'</span></div>';
+}
+function etqSede(c){return '<span class="cod">'+c+'</span><span class="nom">'+esc(D.nombre[c])+'</span>';}
+function tabla(cab,filas,pie,grupo){
+  return '<div class="tabla"><table><thead>'+(grupo||'')+'<tr>'+cab.map(function(h,i){return '<th'+(i===1&&cab[1]==='Descripción'?' class="izq"':'')+'>'+esc(h)+'</th>';}).join('')+'</tr></thead><tbody>'+
+    filas.map(function(f){return '<tr>'+f.map(function(c,i){return '<td'+(i===1&&cab[1]==='Descripción'?' class="desc"':'')+'>'+c+'</td>';}).join('')+'</tr>';}).join('')+
+    '</tbody>'+(pie?'<tfoot><tr>'+pie.map(function(c){return '<th>'+c+'</th>';}).join('')+'</tr></tfoot>':'')+'</table></div>';
+}
+function sedesCargadas(A){return SEDES.map(function(s){return s[0];}).filter(function(c){return A.porSede[c];});}
+function tiposOrden(m){return Object.keys(m).sort(function(x,y){return m[y].total-m[x].total;});}
+
+/* ---------- secciones ---------- */
+
+function secEstado(A,a){
+  var h='<div class="tarjetas">'+tarjeta(fmt(a.total),'ítems inventariados',null,S.sede?pct(a.total,A.red.total)+' de la red':null);
+  CATS.forEach(function(c){h+=tarjeta(fmt(a.cat[c]),c.toLowerCase()+' ('+pct(a.cat[c],a.total)+')',COLOR[c],S.sede?'Red: '+pct(A.red.cat[c],A.red.total):null);});
+  h+=tarjeta(fmt(valorizar(a)),'total a valorizar',null,S.sede?'Red: '+fmt(valorizar(A.red)):null)+'</div>';
+  var ley=leyenda(CATS.map(function(c){return [c,COLOR[c]];}));
+
+  if(!S.sede){
+    var filas=SEDES.map(function(s){return {c:s[0],a:A.porSede[s[0]]||null};});
+    var crit={
+      codigo:function(x,y){return x.c<y.c?-1:1;},
+      tamano:function(x,y){return y.a.total-x.a.total;},
+      valorizar:function(x,y){return y.a.cat['Para valorizar']/y.a.total-x.a.cat['Para valorizar']/x.a.total;},
+      extraviados:function(x,y){return y.a.cat['Extraviados y perdidos']/y.a.total-x.a.cat['Extraviados y perdidos']/x.a.total;}};
+    var con=filas.filter(function(f){return f.a;}).sort(crit[S.orden]), sin=filas.filter(function(f){return !f.a;});
+    var botones=[['codigo','Código'],['tamano','Tamaño'],['valorizar','% para valorizar'],['extraviados','% extraviados']].map(function(b){
+      return '<button data-orden="'+b[0]+'" aria-pressed="'+(S.orden===b[0])+'">'+b[1]+'</button>';}).join('');
+    h+='<section class="panel"><div class="panel-cab"><h3>Distribución por biblioteca</h3>'+ley+'<div class="orden" role="group" aria-label="Ordenar">'+botones+'</div></div>'+
+      '<div class="muro-cab"><span>Biblioteca</span><span>Distribución de la colección</span><span class="num">Ítems</span><span class="num">% para valorizar</span><span class="num">% extraviados</span></div><div class="muro">'+
+      con.map(function(f){var x=f.a; return '<button class="fila" data-sede="'+f.c+'" title="Ver '+esc(D.nombre[f.c])+'"><span>'+etqSede(f.c)+'</span>'+
+        barraApilada(CATS.map(function(c){return [c,x.cat[c],COLOR[c]];}),x.total)+
+        '<span class="num">'+fmt(x.total)+'</span><span class="num">'+pct(x.cat['Para valorizar'],x.total)+'</span><span class="num">'+pct(x.cat['Extraviados y perdidos'],x.total)+'</span></button>';}).join('')+
+      sin.map(function(f){return '<button class="fila pendiente" data-sede="'+f.c+'"><span>'+etqSede(f.c)+'</span><span class="barra">Pendiente de carga</span><span class="num">–</span><span class="num">–</span><span class="num">–</span></button>';}).join('')+
+      '</div><p class="nota">Haz clic en una biblioteca para ver su detalle.</p></section>';
+    EXCEL=[{hoja:'Por biblioteca',filas:[['Código','Biblioteca','Fecha de corte','Ítems'].concat(CATS,['Total a valorizar','% disponibles','% para valorizar','% extraviados y perdidos'])]
+      .concat(con.map(function(f){var x=f.a,c=A.cargas[f.c]; return [f.c,D.nombre[f.c],c?c[3]:'',x.total].concat(CATS.map(function(k){return x.cat[k];}),
+        [valorizar(x),pctN(x.cat['Disponibles'],x.total),pctN(x.cat['Para valorizar'],x.total),pctN(x.cat['Extraviados y perdidos'],x.total)]);}))
+      .concat([['Total','Toda la red','',A.red.total].concat(CATS.map(function(k){return A.red.cat[k];}),[valorizar(A.red),pctN(A.red.cat['Disponibles'],A.red.total),pctN(A.red.cat['Para valorizar'],A.red.total),pctN(A.red.cat['Extraviados y perdidos'],A.red.total)])])}];
+  } else {
+    var comp=CATS.map(function(c){var ps=pctN(a.cat[c],a.total),pr=pctN(A.red.cat[c],A.red.total);
+      return '<div class="comp"><div class="fila1"><span>'+sq(COLOR[c])+' '+c+'</span><span class="num"><b>'+pct(a.cat[c],a.total)+'</b> <span style="color:var(--gris2)">red '+pct(A.red.cat[c],A.red.total)+'</span></span></div>'+
+        '<div class="b1"><div style="width:'+ps+'%;background:'+COLOR[c]+';min-width:'+(ps?3:0)+'px"></div></div><div class="b2"><div style="width:'+pr+'%;background:#9a9a9a"></div></div></div>';}).join('');
+    h+='<div class="dos"><section class="panel"><div class="panel-cab"><h3>Distribución de la colección</h3></div>'+
+      barraApilada(CATS.map(function(c){return [c,a.cat[c],COLOR[c]];}),a.total,'dist')+
+      '<div class="leyenda" style="flex-direction:column;gap:8px">'+CATS.map(function(c){return '<span>'+sq(COLOR[c])+c+': <b>&nbsp;'+fmt(a.cat[c])+'</b>&nbsp;('+pct(a.cat[c],a.total)+')</span>';}).join('')+'</div></section>'+
+      '<section class="panel"><div class="panel-cab"><h3>Comparación con la red</h3></div>'+comp+'<p class="nota">Barra de color: '+esc(D.nombre[S.sede])+'. Barra gris: toda la red.</p></section></div>';
+    EXCEL=[{hoja:'Estado',filas:[['Categoría','Ítems','% del total','% en la red']].concat(CATS.map(function(c){return [c,a.cat[c],pctN(a.cat[c],a.total),pctN(A.red.cat[c],A.red.total)];}),
+      [['Total a valorizar',valorizar(a),'',''],['Ítems inventariados',a.total,'','']])}];
+  }
+  return h;
+}
+
+function secValorizar(A,a){
+  var ret=a.est['Retirado de colección']||0, env=a.est['En valorización']||0, ext=a.cat['Extraviados y perdidos'];
+  var h='<div class="tarjetas">'+tarjeta(fmt(valorizar(a)),'ítems a valorizar en total',null,pct(valorizar(a),a.total)+' de la colección')+
+    tarjeta(fmt(a.cat['Para valorizar']),'para valorizar',COLOR['Para valorizar'],'Retirados y en valorización')+
+    tarjeta(fmt(ret),'retirados de colección',TONO['Retirado de colección'])+
+    tarjeta(fmt(env),'en valorización',TONO['En valorización'])+
+    tarjeta(fmt(ext),'extraviados y perdidos (valorizar por baja)',COLOR['Extraviados y perdidos'])+'</div>';
+  var ley=leyenda([['Retirado de colección',TONO['Retirado de colección']],['En valorización',TONO['En valorización']],['Extraviados y perdidos',COLOR['Extraviados y perdidos']]]);
+  var partes=function(x){return [['Retirado de colección',x.est['Retirado de colección']||0,TONO['Retirado de colección']],['En valorización',x.est['En valorización']||0,TONO['En valorización']],['Extraviados y perdidos',x.cat['Extraviados y perdidos'],COLOR['Extraviados y perdidos']]];};
+  if(!S.sede){
+    var lista=sedesCargadas(A).filter(function(c){return valorizar(A.porSede[c]);}).sort(function(x,y){return valorizar(A.porSede[y])-valorizar(A.porSede[x]);});
+    var max=lista.length?valorizar(A.porSede[lista[0]]):1;
+    h+='<section class="panel"><div class="panel-cab"><h3>Material a valorizar por biblioteca</h3>'+ley+'</div>'+
+      (lista.map(function(c){return hbar('<button class="enlace" data-sede="'+c+'" style="color:inherit;text-decoration:none">'+etqSede(c)+'</button>',partes(A.porSede[c]),max);}).join('')||'<p class="nota">Sin material a valorizar.</p>')+'</section>';
+    EXCEL=[{hoja:'A valorizar por biblioteca',filas:[['Código','Biblioteca','Retirado de colección','En valorización','Para valorizar','Extraviados y perdidos','Total a valorizar']]
+      .concat(lista.map(function(c){var x=A.porSede[c]; return [c,D.nombre[c],x.est['Retirado de colección']||0,x.est['En valorización']||0,x.cat['Para valorizar'],x.cat['Extraviados y perdidos'],valorizar(x)];}))
+      .concat([['Total','Toda la red',A.red.est['Retirado de colección']||0,A.red.est['En valorización']||0,A.red.cat['Para valorizar'],A.red.cat['Extraviados y perdidos'],valorizar(A.red)]])}];
+  } else {
+    var tipos=tiposOrden(A.porTipoSede).filter(function(t){return valorizar(A.porTipoSede[t]);});
+    var maxT=tipos.length?valorizar(A.porTipoSede[tipos[0]]):1;
+    h+='<div class="dos"><section class="panel"><div class="panel-cab"><h3>Por tipo de ítem</h3>'+ley+'</div>'+
+      (tipos.map(function(t){return hbar('<b>'+esc(t)+'</b> <span style="color:var(--gris)">'+esc(TIPOS[t]||'')+'</span>',partes(A.porTipoSede[t]),maxT);}).join('')||'<p class="nota">Sin material a valorizar.</p>')+'</section>'+
+      '<section class="panel"><div class="panel-cab"><h3>Detalle</h3></div>'+
+      tabla(['Tipo','Retirado','En valorización','Extraviados y perdidos','Total'],tipos.map(function(t){var x=A.porTipoSede[t]; return ['<b>'+esc(t)+'</b>',fmt(x.est['Retirado de colección']),fmt(x.est['En valorización']),fmt(x.cat['Extraviados y perdidos']),'<b>'+fmt(valorizar(x))+'</b>'];}),
+        ['Total',fmt(ret),fmt(env),fmt(ext),fmt(valorizar(a))])+'</section></div>';
+    EXCEL=[{hoja:'A valorizar por tipo',filas:[['Tipo','Descripción','Retirado de colección','En valorización','Extraviados y perdidos','Total a valorizar']]
+      .concat(tipos.map(function(t){var x=A.porTipoSede[t]; return [t,TIPOS[t]||'',x.est['Retirado de colección']||0,x.est['En valorización']||0,x.cat['Extraviados y perdidos'],valorizar(x)];}))
+      .concat([['Total','',ret,env,ext,valorizar(a)]])}];
+  }
+  return h;
+}
+
+function secExtraviados(A,a){
+  var ests=estadosDe(a,'Extraviados y perdidos'), tot=a.cat['Extraviados y perdidos'];
+  var h='<div class="tarjetas">'+tarjeta(fmt(tot),'extraviados y perdidos',COLOR['Extraviados y perdidos'],pct(tot,a.total)+' de la colección'+(S.sede?' (red '+pct(A.red.cat['Extraviados y perdidos'],A.red.total)+')':''))+
+    ests.map(function(e){return tarjeta(fmt(a.est[e]),e.toLowerCase(),TONO[e]||COLOR['Extraviados y perdidos'],pct(a.est[e],tot)+' de los extraviados');}).join('')+'</div>';
+  if(!tot) return h+'<section class="panel vacio"><b>Sin extraviados ni perdidos</b></section>';
+  var maxE=Math.max.apply(null,ests.map(function(e){return a.est[e];}));
+  var porEstado='<section class="panel"><div class="panel-cab"><h3>Por estado</h3></div>'+
+    ests.map(function(e){return hbar(esc(e),[[e,a.est[e],TONO[e]||COLOR['Extraviados y perdidos']]],maxE);}).join('')+
+    '<div class="hbar total"><span>Total</span><span></span><span class="num">'+fmt(tot)+'</span></div></section>';
+  var leyE=leyenda(ests.map(function(e){return [e,TONO[e]||COLOR['Extraviados y perdidos']];}));
+  if(!S.sede){
+    var lista=sedesCargadas(A).filter(function(c){return A.porSede[c].cat['Extraviados y perdidos'];})
+      .sort(function(x,y){return A.porSede[y].cat['Extraviados y perdidos']-A.porSede[x].cat['Extraviados y perdidos'];});
+    var max=lista.length?A.porSede[lista[0]].cat['Extraviados y perdidos']:1;
+    h+='<div class="dos">'+porEstado+'<section class="panel"><div class="panel-cab"><h3>Por biblioteca</h3>'+leyE+'</div>'+
+      lista.map(function(c){var x=A.porSede[c]; return hbar('<button class="enlace" data-sede="'+c+'" style="color:inherit;text-decoration:none">'+etqSede(c)+'</button>',
+        ests.map(function(e){return [e,x.est[e]||0,TONO[e]||COLOR['Extraviados y perdidos']];}),max,fmt(x.cat['Extraviados y perdidos']),' <span style="color:var(--gris2);font-size:13px">'+pct(x.cat['Extraviados y perdidos'],x.total)+'</span>');}).join('')+
+      '</section></div>';
+    EXCEL=[{hoja:'Extraviados por biblioteca',filas:[['Código','Biblioteca'].concat(ests,['Total','% de la colección'])]
+      .concat(lista.map(function(c){var x=A.porSede[c]; return [c,D.nombre[c]].concat(ests.map(function(e){return x.est[e]||0;}),[x.cat['Extraviados y perdidos'],pctN(x.cat['Extraviados y perdidos'],x.total)]);}))
+      .concat([['Total','Toda la red'].concat(ests.map(function(e){return A.red.est[e]||0;}),[tot,pctN(tot,A.red.total)])])}];
+  } else {
+    var tipos=tiposOrden(A.porTipoSede).filter(function(t){return A.porTipoSede[t].cat['Extraviados y perdidos'];});
+    h+='<div class="dos">'+porEstado+'<section class="panel"><div class="panel-cab"><h3>Por tipo de ítem</h3></div>'+
+      tabla(['Tipo'].concat(ests,['Total']),tipos.map(function(t){var x=A.porTipoSede[t]; return ['<b>'+esc(t)+'</b>'].concat(ests.map(function(e){return fmt(x.est[e]);}),['<b>'+fmt(x.cat['Extraviados y perdidos'])+'</b>']);}),
+        ['Total'].concat(ests.map(function(e){return fmt(a.est[e]);}),[fmt(tot)]))+'</section></div>';
+    EXCEL=[{hoja:'Extraviados por tipo',filas:[['Tipo','Descripción'].concat(ests,['Total'])]
+      .concat(tipos.map(function(t){var x=A.porTipoSede[t]; return [t,TIPOS[t]||''].concat(ests.map(function(e){return x.est[e]||0;}),[x.cat['Extraviados y perdidos']]);}))
+      .concat([['Total',''].concat(ests.map(function(e){return a.est[e]||0;}),[tot])])}];
+  }
+  return h;
+}
+
+function secTipos(A,a){
+  var m=S.sede?A.porTipoSede:A.porTipo, tipos=tiposOrden(m);
+  var h='<div class="tarjetas">'+tarjeta(fmt(tipos.length),'tipos de ítem')+tarjeta(fmt(a.total),'ítems inventariados')+
+    (tipos.length?tarjeta(pct(m[tipos[0]].total,a.total),'de los ítems son '+esc(tipos[0])+' ('+esc((TIPOS[tipos[0]]||'').toLowerCase())+')'):'')+'</div>';
+  if(!S.sede){
+    h+='<section class="panel"><div class="panel-cab"><h3>Ítems por tipo y categoría</h3>'+leyenda(CATS.map(function(c){return [c,COLOR[c]];}))+'</div>'+
+      tabla(['Tipo','Descripción'].concat(CATS,['Total','Distribución','% extraviados']),tipos.map(function(t){var x=m[t];
+        return ['<b>'+esc(t)+'</b>',esc(TIPOS[t]||'')].concat(CATS.map(function(c){return fmt(x.cat[c]);}),['<b>'+fmt(x.total)+'</b>',
+          '<div style="width:160px;margin-left:auto">'+barraApilada(CATS.map(function(c){return [c,x.cat[c],COLOR[c]];}),x.total)+'</div>',pct(x.cat['Extraviados y perdidos'],x.total)]);}),
+        ['Total',''].concat(CATS.map(function(c){return fmt(a.cat[c]);}),[fmt(a.total),'',pct(a.cat['Extraviados y perdidos'],a.total)]))+'</section>';
+    EXCEL=[{hoja:'Por tipo de ítem',filas:[['Tipo','Descripción'].concat(CATS,['Total','% extraviados y perdidos'])]
+      .concat(tipos.map(function(t){var x=m[t]; return [t,TIPOS[t]||''].concat(CATS.map(function(c){return x.cat[c];}),[x.total,pctN(x.cat['Extraviados y perdidos'],x.total)]);}))
+      .concat([['Total',''].concat(CATS.map(function(c){return a.cat[c];}),[a.total,pctN(a.cat['Extraviados y perdidos'],a.total)])])}];
+  } else {
+    var grupos=CATS.map(function(c){return {cat:c,est:estadosDe(a,c)};}).filter(function(g){return g.est.length;});
+    var cols=[]; grupos.forEach(function(g){cols=cols.concat(g.est);});
+    var grupo='<tr class="grupo"><th></th>'+grupos.map(function(g){return '<th colspan="'+g.est.length+'" style="border-top-color:'+COLOR[g.cat]+'">'+g.cat+'</th>';}).join('')+'<th></th></tr>';
+    h+='<section class="panel"><div class="panel-cab"><h3>Material por tipo y estado</h3></div>'+
+      tabla(['Tipo'].concat(cols,['Total']),tipos.map(function(t){var x=m[t]; return ['<b>'+esc(t)+'</b><br><span class="desc-tipo">'+esc(TIPOS[t]||'')+'</span>'].concat(cols.map(function(e){return fmt(x.est[e]);}),['<b>'+fmt(x.total)+'</b>']);}),
+        ['Total'].concat(cols.map(function(e){return fmt(a.est[e]);}),[fmt(a.total)]),grupo)+'</section>';
+    EXCEL=[{hoja:'Por tipo y estado',filas:[['Tipo','Descripción'].concat(cols,['Total'])]
+      .concat(tipos.map(function(t){var x=m[t]; return [t,TIPOS[t]||''].concat(cols.map(function(e){return x.est[e]||0;}),[x.total]);}))
+      .concat([['Total',''].concat(cols.map(function(e){return a.est[e]||0;}),[a.total])])}];
+  }
+  return h;
+}
+
+/* ---------- render ---------- */
+
+function render(){
+  $('pestanas').innerHTML=SECCIONES.map(function(s){return '<button role="tab" data-seccion="'+s[0]+'" aria-selected="'+(S.seccion===s[0])+'">'+s[1]+'</button>';}).join('');
+  if(!D.listo){$('seccion').innerHTML=''; return;}
+  var A=agregar();
+  var cargadas=sedesCargadas(A);
+
+  $('selProceso').innerHTML=D.procesos.map(function(p){return '<option>'+esc(p)+'</option>';}).join('');
+  $('selProceso').value=S.proceso||''; $('lblProceso').hidden=D.procesos.length<2;
+  $('selSede').innerHTML='<option value="">Toda la red</option>'+SEDES.map(function(s){return '<option value="'+s[0]+'">'+s[0]+' '+esc(s[1])+(A.porSede[s[0]]?'':' (pendiente)')+'</option>';}).join('');
+  if(S.sede&&!D.nombre[S.sede]) S.sede='';
+  $('selSede').value=S.sede;
+
+  var proc=S.proceso?S.proceso.charAt(0)+S.proceso.slice(1).toLowerCase():'';
+  var c=S.sede?A.cargas[S.sede]:null;
+  var sub=S.sede?'<span>Inventario '+esc(proc)+'</span>'+(c&&c[3]?'<span>Corte '+esc(c[3])+'</span>':'')
+                :'<span>Inventario '+esc(proc)+'</span><span>'+esc(NOTA_ALCANCE)+'</span>';
+  var cab='<div class="seccion-cab"><h2>'+(S.sede?esc(D.nombre[S.sede]):'Toda la red')+'</h2><span class="sub">'+sub+'</span>'+
+    '<div class="descargas">Descargar sección: <button data-descarga="excel">Excel</button><button data-descarga="pdf">PDF</button></div></div>';
+
+  var a=S.sede?A.porSede[S.sede]:A.red;
+  var cuerpo;
+  EXCEL=[];
+  if(!cargadas.length) cuerpo='<section class="panel vacio"><b>Todavía no hay bibliotecas cargadas</b>Se cargan desde la planilla de inventario, con Inventario &gt; Cargar resúmenes.</section>';
+  else if(!a) cuerpo='<section class="panel vacio"><b>'+esc(D.nombre[S.sede])+' todavía no tiene carga en este proceso</b><button class="enlace" data-sede="">Ver toda la red</button></section>';
+  else cuerpo={estado:secEstado,valorizar:secValorizar,extraviados:secExtraviados,tipos:secTipos}[S.seccion](A,a);
+  $('seccion').innerHTML=cab+cuerpo;
+  document.title=(S.sede?D.nombre[S.sede]+' – ':'')+'Inventario de Colecciones de Bibliotecas Duoc UC';
+}
+
+function descargarExcel(){
+  if(!EXCEL.length) return;
+  var wb=XLSX.utils.book_new();
+  EXCEL.forEach(function(t){var ws=XLSX.utils.aoa_to_sheet(t.filas); ws['!cols']=t.filas[0].map(function(h,i){return {wch:i===1?28:Math.max(12,String(h).length+2)};}); XLSX.utils.book_append_sheet(wb,ws,t.hoja.slice(0,31));});
+  var sec=SECCIONES.filter(function(s){return s[0]===S.seccion;})[0][1];
+  XLSX.writeFile(wb,('Inventario '+(S.proceso||'')+' - '+sec+' - '+(S.sede?D.nombre[S.sede]:'Toda la red')).replace(/[\\\/:*?"<>|]/g,'')+'.xlsx');
+}
+
+/* ---------- eventos ---------- */
+
+$('pestanas').addEventListener('click',function(e){var b=e.target.closest('[data-seccion]'); if(!b) return; S.seccion=b.getAttribute('data-seccion'); escribirURL(); render();});
+$('selSede').addEventListener('change',function(e){S.sede=e.target.value; escribirURL(); render();});
+$('selProceso').addEventListener('change',function(e){S.proceso=e.target.value; render();});
+$('seccion').addEventListener('click',function(e){
+  var o=e.target.closest('[data-orden]'); if(o){S.orden=o.getAttribute('data-orden'); render(); return;}
+  var d=e.target.closest('[data-descarga]'); if(d){if(d.getAttribute('data-descarga')==='excel') descargarExcel(); else window.print(); return;}
+  var s=e.target.closest('[data-sede]'); if(s){S.sede=s.getAttribute('data-sede'); escribirURL(); render(); window.scrollTo(0,0);}
+});
+
+leerURL();
+render();
+cargar();
+</script>
+</body>
+</html>
