@@ -38,7 +38,7 @@ button,select{font:inherit;color:inherit}
 
 .seccion-cab{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:28px 0 22px}
 .seccion-cab h2{font-family:var(--serif);font-weight:900;font-size:42px;line-height:1.15;margin:0}
-.seccion-cab .sub{font-size:19px;color:var(--gris);display:flex;gap:18px;flex-wrap:wrap}
+.seccion-cab .sub{font-size:19px;color:var(--gris);display:flex;gap:2px 18px;flex-wrap:wrap;flex:1 1 320px;min-width:0}
 .descargas{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--gris);font-size:17px}
 .descargas button{background:#fff;border:1px solid var(--linea);border-radius:4px;padding:8px 18px;font-weight:700;font-size:17px;cursor:pointer}
 .descargas button:hover{border-color:var(--negro)}
@@ -149,10 +149,13 @@ var CONFIG = {
 };
 /* ================================================================================ */
 
-var SEDES = [['AL','Alameda'],['AO','Alonso Ovalle'],['AR','Arauco'],['AV','Antonio Varas'],['CO','Concepción'],
-  ['LC','Luis Cousiño'],['MA','Maipú'],['ME','Melipilla'],['NA','Nacimiento'],['PA','Puente Alto'],['PM','Puerto Montt'],
+var SEDES = [['AL','Alameda'],['AO','Alonso Ovalle'],['AV','Antonio Varas'],['CO','Concepción'],
+  ['LC','Luis Cousiño'],['MA','Maipú'],['PA','Puente Alto'],['PM','Puerto Montt'],
   ['PN','Plaza Norte'],['PO','Plaza Oeste'],['PV','Plaza Vespucio'],['SB','San Bernardo'],['SC','San Carlos'],
-  ['SJ','San Joaquín'],['VA','Valparaíso'],['VM','Viña del Mar'],['VR','Villarrica']];
+  ['SJ','San Joaquín'],['VA','Valparaíso'],['VM','Viña del Mar']];
+// Fuera de este inventario: campus Arauco, Nacimiento y Villarrica, y sede Melipilla (se ignoran aunque tengan datos)
+var EXCLUIDAS = ['AR','NA','VR','ME'];
+var NOTA_ALCANCE = 'Inventario refleja estado julio 2026 (no considera campus ni sede Melipilla)';
 var TIPOS = {AV:'Audiovisual','AV-EQUIP':'Equipo audiovisual',BKAD:'Libro Alta Demanda',BKCG:'Libro Colección General',
   BKDG:'Libro Digital',BKRE:'Libro Recreación',BKRF:'Libro Referencia',CAAD:'Calculadora Alta Demanda',CARF:'Calculadora Referencia',
   CDAD:'CDROM Alta Demanda',CDCG:'CDROM Colección General',CDRE:'CDROM Recreación',CDRF:'CDROM Referencia',DIRF:'Diapositivas',
@@ -212,11 +215,11 @@ function procesar(filasDatos,filasPub){
   D.datos=filasDatos.slice(1).map(function(r){
     return [String(r[a[0]]||'').trim(),String(r[a[1]]||'').trim().toUpperCase(),String(r[a[2]]||'').trim().toUpperCase(),
             String(r[a[3]]||'').trim(),String(r[a[4]]||'').trim(),num(r[a[5]])];
-  }).filter(function(r){return r[0]&&r[1]&&r[5]&&CATS.indexOf(r[4])>=0;});
+  }).filter(function(r){return r[0]&&r[1]&&r[5]&&CATS.indexOf(r[4])>=0&&EXCLUIDAS.indexOf(r[1])<0;});
   var b=columnas(filasPub[0]||[],['Proceso','Sede','Biblioteca','Fecha de corte','Archivo'],'Publicación');
   D.cargas=filasPub.slice(1).map(function(r){
     return [String(r[b[0]]||'').trim(),String(r[b[1]]||'').trim().toUpperCase(),String(r[b[2]]||'').trim(),String(r[b[3]]||'').trim(),String(r[b[4]]||'').trim()];
-  }).filter(function(r){return r[0]&&r[1];});
+  }).filter(function(r){return r[0]&&r[1]&&EXCLUIDAS.indexOf(r[1])<0;});
 
   D.nombre={}; SEDES.forEach(function(s){D.nombre[s[0]]=s[1];});
   D.cargas.forEach(function(c){if(!D.nombre[c[1]]){D.nombre[c[1]]=c[2]||c[1]; SEDES.push([c[1],c[2]||c[1]]);}});
@@ -452,7 +455,7 @@ function render(){
   var proc=S.proceso?S.proceso.charAt(0)+S.proceso.slice(1).toLowerCase():'';
   var c=S.sede?A.cargas[S.sede]:null;
   var sub=S.sede?'<span>Inventario '+esc(proc)+'</span>'+(c&&c[3]?'<span>Corte '+esc(c[3])+'</span>':'')
-                :'<span>Inventario '+esc(proc)+'</span><span>'+cargadas.length+' de '+SEDES.length+' bibliotecas cargadas</span>';
+                :'<span>Inventario '+esc(proc)+'</span><span>'+esc(NOTA_ALCANCE)+'</span>';
   var cab='<div class="seccion-cab"><h2>'+(S.sede?esc(D.nombre[S.sede]):'Toda la red')+'</h2><span class="sub">'+sub+'</span>'+
     '<div class="descargas">Descargar sección: <button data-descarga="excel">Excel</button><button data-descarga="pdf">PDF</button></div></div>';
 
